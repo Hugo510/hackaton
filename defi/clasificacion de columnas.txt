@@ -1,0 +1,48 @@
+Para diferenciar entre los campos que se pueden extraer directamente de los registros de Suricata en el archivo `eve.json` y aquellos que requieren cálculos adicionales, vamos a revisar cada uno de ellos:
+
+### Campos que pueden extraerse directamente de `eve.json`:
+
+1. **Src Port**: Puerto de origen.
+2. **Dst Port**: Puerto de destino.
+3. **Protocol**: Protocolo utilizado (TCP, UDP, etc.).
+4. **Total Fwd Packets**: Total de paquetes enviados desde el origen al destino.
+5. **Total Bwd Packets**: Total de paquetes enviados desde el destino al origen.
+6. **Total Length of Fwd Packets**: Suma total de los tamaños de todos los paquetes enviados desde el origen al destino.
+7. **Total Length of Bwd Packets**: Suma total de los tamaños de todos los paquetes enviados desde el destino al origen.
+8. **Fwd PSH Flags**: Conteo de banderas PSH en paquetes enviados.
+9. **Bwd PSH Flags**: Conteo de banderas PSH en paquetes recibidos.
+10. **Fwd URG Flags**: Conteo de banderas URG en paquetes enviados.
+11. **Bwd URG Flags**: Conteo de banderas URG en paquetes recibidos.
+12. **FWD Init Win Bytes**: Tamaño inicial de la ventana en paquetes enviados.
+13. **Bwd Init Win Bytes**: Tamaño inicial de la ventana en paquetes recibidos.
+14. **Fwd Act Data Pkts**: Paquetes de datos activos enviados.
+15. **Fwd Seg Size Min**: Tamaño mínimo de segmento enviado.
+
+Algunos de estos campos, especialmente relacionados con conteos específicos de paquetes y tamaños totales, podrían no estar disponibles directamente en algunos formatos de `eve.json` y pueden requerir cálculos ligeros o agregaciones simples basadas en los eventos capturados.
+
+### Campos que requieren cálculo o procesamiento:
+
+1. **Flow Duration**: Requiere calcular la diferencia de tiempo entre el inicio y el fin del flujo.
+2. **Fwd Packet Length Max, Min, Mean, Std**: Requiere cálculos estadísticos sobre el tamaño de los paquetes enviados.
+3. **Bwd Packet Length Max, Min, Mean, Std**: Requiere cálculos estadísticos sobre el tamaño de los paquetes recibidos.
+4. **Flow Bytes/s**: Calculado como total de bytes dividido por la duración del flujo.
+5. **Flow Packets/s**: Calculado como total de paquetes dividido por la duración del flujo.
+6. **Flow IAT Mean, Std, Max, Min**: Estadísticas de tiempo entre llegadas de paquetes para el flujo completo.
+7. **Fwd IAT Total, Mean, Std, Max, Min**: Estadísticas de tiempo entre llegadas de paquetes enviados.
+8. **Bwd IAT Total, Mean, Std, Max, Min**: Estadísticas de tiempo entre llegadas de paquetes recibidos.
+9. **Fwd Header Length**: Puede requerir sumar las longitudes de cabeceras de paquetes enviados.
+10. **Bwd Header Length**: Puede requerir sumar las longitudes de cabeceras de paquetes recibidos.
+11. **Fwd Packets/s, Bwd Packets/s**: Calculado como el conteo de paquetes enviados/recibidos dividido por la duración del flujo.
+12. **Packet Length Min, Max, Mean, Std, Variance**: Estadísticas descriptivas sobre el tamaño de todos los paquetes en el flujo.
+13. **FIN, SYN, RST, PSH, ACK, URG, CWE, ECE Flag Count**: Conteo de banderas específicas.
+14. **Down/Up Ratio**: Relación entre paquetes enviados y recibidos.
+15. **Average Packet Size**: Tamaño promedio de los paquetes en el flujo.
+16. **Fwd Segment Size Avg, Bwd Segment Size Avg**: Tamaño promedio de segmento de paquetes enviados/recibidos.
+17. **Fwd Bytes/Bulk Avg, Fwd Packet/Bulk Avg, Fwd Bulk Rate Avg**: Estos campos implican la agregación de datos en "bulks" o lotes de paquetes.
+18. **Bwd Bytes/Bulk Avg, Bwd Packet/Bulk Avg, Bwd Bulk Rate Avg**: Similar a los campos de "fwd" pero para paquetes recibidos.
+
+
+19. **Subflow Fwd Packets, Subflow Fwd Bytes, Subflow Bwd Packets, Subflow Bwd Bytes**: Información sobre subflujos dentro del flujo principal.
+20. **Active Mean, Std, Max, Min, Idle Mean, Std, Max, Min**: Estadísticas sobre períodos de actividad e inactividad dentro del flujo.
+
+La mayoría de estos cálculos requieren análisis detallado y procesamiento de los datos de flujo capturados por Suricata, que pueden incluir desde simples diferencias de tiempo hasta cálculos estadísticos más complejos.

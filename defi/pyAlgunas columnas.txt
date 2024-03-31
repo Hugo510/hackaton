@@ -1,0 +1,62 @@
+import json
+import csv
+from datetime import datetime
+
+# Adaptar los nombres de los campos según sea necesario.
+fields = [
+    "Src Port", "Dst Port", "Protocol",
+    "Flow Duration", "Total Fwd Packets", "Total Bwd Packets",
+    "Total Length of Fwd Packets", "Total Length of Bwd Packets",
+    # A continuación, se incluyen solo algunos campos para simplificar.
+    # Deberías agregar los campos restantes y sus cálculos correspondientes según lo que necesites.
+    "Fwd Packet Length Max", # y demás campos según la estructura definida arriba.
+    "Traffic Type"
+]
+
+# Función para determinar el tipo de tráfico (adaptar según sea necesario)
+def determine_traffic_type(event):
+    if event.get("dest_port") in [80, 443]:
+        return "Web"
+    else:
+        return "Unknown"
+
+# Función para calcular la duración del flujo
+def calculate_flow_duration(start, end):
+    fmt = '%Y-%m-%dT%H:%M:%S.%fZ'
+    start_dt = datetime.strptime(start, fmt)
+    end_dt = datetime.strptime(end, fmt)
+    duration = (end_dt - start_dt).total_seconds() * 1000  # Convertir a milisegundos
+    return duration
+
+with open('eve.json', 'r') as infile, open('traffic.csv', 'w', newline='') as outfile:
+    writer = csv.DictWriter(outfile, fieldnames=fields)
+    writer.writeheader()
+
+    for line in infile:
+        try:
+            event = json.loads(line)
+
+            # Filtrar eventos de flujo
+            if event.get("event_type") == "flow":
+                # Inicializar o calcular los campos requeridos
+                flow_duration = calculate_flow_duration(event['flow']['start'], event['flow']['end'])
+
+                # Asumiendo que los campos como "Total Fwd Packets" se deben calcular
+                total_fwd_packets = event['flow'].get('pkts_toserver', 0)
+                total_bwd_packets = event['flow'].get('pkts_toclient', 0)
+
+                # A continuación, se muestra cómo llenar algunos campos. Deberás expandir esto.
+                csv_row = {
+                    "Src Port": event.get("src_port"),
+                    "Dst Port": event.get("dest_port"),
+                    "Protocol": event.get("proto"),
+                    "Flow Duration": flow_duration,
+                    "Total Fwd Packets": total_fwd_packets,
+                    "Total Bwd Packets": total_bwd_packets,
+                    # Añadir el resto de los campos aquí según los cálculos o transformaciones necesarias.
+                    "Traffic Type": determine_traffic_type(event)
+                }
+
+                writer.writerow({field: csv_row.get(field, '') for field in fields})
+        except json.JSONDecodeError:
+            continue

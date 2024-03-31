@@ -1,0 +1,22 @@
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert:
+            # Configuración para alertas, si es necesario
+        - http:
+            enabled: yes
+            extended: yes  # Para capturar datos detallados del tráfico HTTP
+        - dns:
+            enabled: yes   # Para capturar consultas DNS
+        - tls:
+            enabled: yes
+            extended: yes  # Para capturar detalles de la negociación TLS
+        - flow:
+            enabled: yes
+            metadata: true    # Captura metadatos del flujo
+            tos: true         # Captura Type of Service
+            toclient: true    # Captura datos enviados al cliente
+            toserver: true    # Captura datos enviados al servidor

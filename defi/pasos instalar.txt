@@ -1,0 +1,38 @@
+Paso 1: Actualizar el Sistema
+sudo apt-get update && sudo apt-get upgrade -y
+
+Paso 2: Instalar las Dependencias Requeridas
+sudo apt-get install -y libpcre3 libpcre3-dbg libpcre3-dev \
+build-essential autoconf automake libtool libpcap-dev libnet1-dev \
+libyaml-0-2 libyaml-dev pkg-config zlib1g zlib1g-dev libcap-ng-dev libcap-ng0 \
+make libmagic-dev libjansson-dev libjansson4 libnss3-dev libgeoip-dev liblua5.1-dev
+
+Paso 3: Descargar y Compilar Suricata
+wget https://www.openinfosecfoundation.org/download/suricata-7.0.4.tar.gz
+tar -xvzf suricata-7.0.4.tar.gz
+cd suricata-7.0.4
+./configure --sysconfdir=/etc --localstatedir=/var --enable-nfqueue --prefix=/usr
+make
+sudo make install
+sudo make install-conf
+sudo make install-rules
+suricata --version
+
+Paso 4: Configurar Suricata
+sudo nano /etc/suricata/suricata.yaml
+
+Paso 5: Ejecutar Suricata
+sudo suricata -c /etc/suricata/suricata.yaml -i tu_interfaz_de_red
+
+
+**************************************************Editar
+Paso 1: Editar el Archivo de Configuración de Suricata
+sudo nano /etc/suricata/suricata.yaml
+
+Paso 2: Configurar
+
+Paso 3: Reiniciar Suricata
+sudo systemctl restart suricata
+
+Paso 4: Verificar la Configuración
+sudo tail -f /var/log/suricata/eve.json
