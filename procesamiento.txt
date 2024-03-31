@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+import json
+
+# Carga los datos de eve.json
+with open('eve.json', 'r') as file:
+    lines = file.readlines()
+    data = [json.loads(line) for line in lines if json.loads(line).get('event_type', '') in ['flow', 'http', 'dns', 'tls']]
+
+# Convierte los datos cargados en un DataFrame de Pandas
+df = pd.json_normalize(data)
+
+# Selecciona características numéricas y categóricas basándose en los datos disponibles de Suricata
+features = ['src_port', 'dest_port', 'proto', 'flow.pkts_toserver', 'flow.pkts_toclient', 'flow.bytes_toserver', 'flow.bytes_toclient', 'tcp.flags']
+df = df[features]
+
+# Define características numéricas y categóricas basadas en los datos de Suricata
+numeric_features = ['src_port', 'dest_port', 'flow.pkts_toserver', 'flow.pkts_toclient', 'flow.bytes_toserver', 'flow.bytes_toclient']
+categorical_features = ['proto', 'tcp.flags']
+
+# Preprocesamiento: Normalización para características numéricas y codificación one-hot para categóricas
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', StandardScaler(), numeric_features),
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+    ])
+
+# Aplica el preprocesamiento
+X_preprocessed = preprocessor.fit_transform(df)
+
+# Convertir el resultado preprocesado a DataFrame para visualización o uso posterior
+# Esto es opcional pero útil para verificación y análisis
+columns_transformed = (preprocessor.named_transformers_['num'].get_feature_names_out(numeric_features).tolist() +
+                        preprocessor.named_transformers_['cat'].get_feature_names_out(categorical_features).tolist())
+df_preprocessed = pd.DataFrame(X_preprocessed.toarray(), columns=columns_transformed)
+
+# df_preprocessed ahora contiene las características numéricas normalizadas y categóricas codificadas
+print(df_preprocessed.head())
